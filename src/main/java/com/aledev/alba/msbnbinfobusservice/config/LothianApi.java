@@ -19,7 +19,7 @@ public class LothianApi {
 
     @Scheduled(cron = "@hourly")
     public String getUrl() {
-        return baseUrl + encryptKeyWithDate();
+        return baseUrl + "&key=" + encryptKeyWithDate();
     }
 
     private String encryptKeyWithDate() {
