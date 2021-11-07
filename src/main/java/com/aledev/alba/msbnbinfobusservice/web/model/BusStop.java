@@ -11,8 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BusInfo {
-    private String busNumber;
+public class BusStop {
+    private String stopId;
+    private String stopName;
     private String busRoute;
-    private List<Schedule> busTimes;
+    private List<BusInfo> busInfos;
 }

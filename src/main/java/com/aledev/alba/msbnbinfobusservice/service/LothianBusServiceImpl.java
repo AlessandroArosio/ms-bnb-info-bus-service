@@ -3,9 +3,9 @@ package com.aledev.alba.msbnbinfobusservice.service;
 import com.aledev.alba.msbnbinfobusservice.config.LothianApi;
 import com.aledev.alba.msbnbinfobusservice.model.BusTimes;
 import com.aledev.alba.msbnbinfobusservice.model.BusTimesItem;
-import com.aledev.alba.msbnbinfobusservice.utils.BusInfoMapper;
 import com.aledev.alba.msbnbinfobusservice.utils.LothianFunctions;
-import com.aledev.alba.msbnbinfobusservice.web.model.BusInfo;
+import com.aledev.alba.msbnbinfobusservice.utils.ResponseMapper;
+import com.aledev.alba.msbnbinfobusservice.web.model.BusStop;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,8 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class LothianBusServiceImpl implements BusService {
@@ -24,17 +22,17 @@ public class LothianBusServiceImpl implements BusService {
     private final RestTemplate restTemplate;
     private final LothianApi api;
     private final LothianFunctions functions;
-    private final BusInfoMapper busInfoMapper;
+    private final ResponseMapper responseMapper;
 
     public LothianBusServiceImpl(
             RestTemplateBuilder restTemplateBuilder,
             LothianApi api,
             LothianFunctions functions,
-            BusInfoMapper busInfoMapper) {
+            ResponseMapper responseMapper) {
         this.restTemplate = restTemplateBuilder.build();
         this.api = api;
         this.functions = functions;
-        this.busInfoMapper = busInfoMapper;
+        this.responseMapper = responseMapper;
     }
 
     @Override
@@ -43,7 +41,7 @@ public class LothianBusServiceImpl implements BusService {
     }
 
     @Override
-    public Map<String, List<BusInfo>> getBusTimes() {
+    public List<BusStop> getBusTimes() {
         String url = api.getUrl() + functions.getBusTimes(DRUM_COTTAGES_TO_CITY_ID, DRUM_COTTAGES_FROM_CITY_ID);
 
         ResponseEntity<BusTimesItem> times = restTemplate.getForEntity(url, BusTimesItem.class);
@@ -51,11 +49,9 @@ public class LothianBusServiceImpl implements BusService {
         if (times.getStatusCode().is2xxSuccessful() && times.getBody() != null) {
             List<BusTimes> busTimes = times.getBody().getBusTimes();
 
-            return busTimes.stream()
-                    .map(busInfoMapper::mapResponse)
-                    .collect(Collectors.groupingBy(BusInfo::getStopId));
+            return responseMapper.map(busTimes);
         }
 
-        return Collections.emptyMap();
+        return Collections.emptyList();
     }
 }
