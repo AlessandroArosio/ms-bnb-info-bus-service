@@ -1,19 +1,27 @@
 package com.aledev.alba.msbnbinfobusservice.utils;
 
 import com.aledev.alba.msbnbinfobusservice.model.BusTimes;
+import com.aledev.alba.msbnbinfobusservice.model.stops.Stop;
 import com.aledev.alba.msbnbinfobusservice.web.model.BusInfo;
 import com.aledev.alba.msbnbinfobusservice.web.model.BusStop;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class ResponseMapperImpl implements ResponseMapper {
     private final BusInfoMapper busInfoMapper;
+    private final Set<Stop> lothianStops;
+
+    public ResponseMapperImpl(
+            BusInfoMapper busInfoMapper,
+            Set<Stop> lothianStops) {
+        this.busInfoMapper = busInfoMapper;
+        this.lothianStops = lothianStops;
+    }
 
     @Override
     public List<BusStop> map(List<BusTimes> times) {
@@ -27,7 +35,7 @@ public class ResponseMapperImpl implements ResponseMapper {
                     List<BusInfo> busInfos = value.stream().map(busInfoMapper::mapResponse).toList();
                     return BusStop.builder()
                             .stopId(entry.getKey())
-                            .stopName(getBusStopName(entry.getKey(), value))
+                            .stopName(getBusStopName(entry.getKey()))
                             .busRoute(getBusRoute(entry.getKey(), value))
                             .busInfos(busInfos)
                             .build();
@@ -35,10 +43,10 @@ public class ResponseMapperImpl implements ResponseMapper {
                 .toList();
     }
 
-    private String getBusStopName(String id, List<BusTimes> value) {
-        return value.stream()
-                .filter(stopName -> stopName.getStopId().equals(id))
-                .map(BusTimes::getStopName)
+    private String getBusStopName(String stopId) {
+        return lothianStops.stream()
+                .filter(stopName -> stopName.getStopId().equals(stopId))
+                .map(Stop::getStopName)
                 .findFirst()
                 .orElse("");
     }

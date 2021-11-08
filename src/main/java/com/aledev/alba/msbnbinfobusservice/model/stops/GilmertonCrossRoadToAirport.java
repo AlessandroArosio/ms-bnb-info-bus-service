@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class GilmertonCrossRoadToAirport implements Stop {
     @Override
     public String getStopName() {
-        return "Gilmerton CrossRd (To airport)";
+        return "Gilmerton CrossRd (To city - Fort Kinnaird)";
     }
 
     @Override
