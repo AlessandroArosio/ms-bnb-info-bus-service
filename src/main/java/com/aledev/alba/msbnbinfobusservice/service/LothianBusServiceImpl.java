@@ -3,6 +3,7 @@ package com.aledev.alba.msbnbinfobusservice.service;
 import com.aledev.alba.msbnbinfobusservice.config.LothianApi;
 import com.aledev.alba.msbnbinfobusservice.model.BusTimes;
 import com.aledev.alba.msbnbinfobusservice.model.BusTimesItem;
+import com.aledev.alba.msbnbinfobusservice.model.stops.Stop;
 import com.aledev.alba.msbnbinfobusservice.utils.LothianFunctions;
 import com.aledev.alba.msbnbinfobusservice.utils.ResponseMapper;
 import com.aledev.alba.msbnbinfobusservice.web.model.BusStop;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class LothianBusServiceImpl implements BusService {
@@ -24,15 +26,19 @@ public class LothianBusServiceImpl implements BusService {
     private final LothianFunctions functions;
     private final ResponseMapper responseMapper;
 
+    private Set<Stop> lothianStops;
+
     public LothianBusServiceImpl(
             RestTemplateBuilder restTemplateBuilder,
             LothianApi api,
             LothianFunctions functions,
-            ResponseMapper responseMapper) {
+            ResponseMapper responseMapper,
+            Set<Stop> lothianStops) {
         this.restTemplate = restTemplateBuilder.build();
         this.api = api;
         this.functions = functions;
         this.responseMapper = responseMapper;
+        this.lothianStops = lothianStops;
     }
 
     @Override
@@ -42,7 +48,7 @@ public class LothianBusServiceImpl implements BusService {
 
     @Override
     public List<BusStop> getBusTimes() {
-        String url = api.getUrl() + functions.getBusTimes(DRUM_COTTAGES_TO_CITY_ID, DRUM_COTTAGES_FROM_CITY_ID);
+        String url = api.getUrl() + functions.getBusTimes(extractStops(this.lothianStops));
 
         ResponseEntity<BusTimesItem> times = restTemplate.getForEntity(url, BusTimesItem.class);
 
@@ -53,5 +59,12 @@ public class LothianBusServiceImpl implements BusService {
         }
 
         return Collections.emptyList();
+    }
+
+    private String[] extractStops(Set<Stop> stops) {
+        var string = stops.stream()
+                .map(Stop::getStopId)
+                .toList();
+        return string.toArray(new String[0]);
     }
 }
