@@ -18,8 +18,6 @@ import java.util.Set;
 
 @Service
 public class LothianBusServiceImpl implements BusService {
-    public static final String DRUM_COTTAGES_TO_CITY_ID = "36234989";
-    public static final String DRUM_COTTAGES_FROM_CITY_ID = "36235235";
 
     private final RestTemplate restTemplate;
     private final LothianApi api;
